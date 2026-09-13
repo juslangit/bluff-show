@@ -1,0 +1,6 @@
+.env
+.env.*
+.DS_Store
+node_modules/
+test/chrome-profile/
+test/shots/

@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#1a0b2e">
+<title>Bluff Show</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Bungee+Shade&family=Rubik:wght@500;700;800&display=swap">
+<style>
+/* ---------- look: a 70s TV quiz show ---------- */
+:root {
+  --stage: #1a0b2e;
+  --stage-2: #2e1152;
+  --curtain: #6b1233;
+  --gold: #ffc53d;
+  --gold-deep: #c98a00;
+  --bulb: #fff4b8;
+  --pink: #ff3d8b;
+  --pink-deep: #b3165a;
+  --teal: #1fd6c6;
+  --teal-deep: #0c8a80;
+  --orange: #ff8a1f;
+  --red: #ff4655;
+  --cream: #fff6e5;
+  --ink: #1b0b2b;
+  --muted: #c7b3e6;
+  --card: #fff6e5;
+  --radius: 22px;
+  --display: 'Bungee', 'Arial Black', Impact, system-ui, sans-serif;
+  --shade: 'Bungee Shade', 'Bungee', 'Arial Black', Impact, sans-serif;
+  --body: 'Rubik', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --vh: 1vh;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--body);
+  font-weight: 500;
+  font-size: clamp(18px, 1.1vw + 14px, 24px);
+  color: var(--cream);
+  background: var(--stage);
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+/* stage lights behind everything */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 45% at 50% -5%, rgba(255, 197, 61, .35), transparent 70%),
+    radial-gradient(ellipse 35% 60% at 0% 100%, rgba(255, 61, 139, .28), transparent 70%),
+    radial-gradient(ellipse 35% 60% at 100% 100%, rgba(31, 214, 198, .22), transparent 70%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 2px, transparent 2px 90px),
+    linear-gradient(180deg, var(--stage-2), var(--stage) 70%);
+  z-index: -1;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+
+.screen {
+  position: fixed; inset: 0;
+  height: calc(var(--vh) * 100);
+  overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column; align-items: center;
+  padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  animation: screen-in .35s ease-out;
+}
+@keyframes screen-in { from { opacity: 0; transform: translateY(14px); } }
+.wrap { width: 100%; max-width: 760px; margin: auto; display: flex; flex-direction: column; gap: 18px; }
+.wide { max-width: 1280px; }
+
+/* ---------- marquee title with chasing bulbs ---------- */
+.marquee {
+  position: relative;
+  padding: 26px 22px 22px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #ff5a3d, var(--pink) 55%, var(--pink-deep));
+  box-shadow: 0 10px 0 #6d0c36, 0 0 60px rgba(255, 61, 139, .45);
+  text-align: center;
+}
+.marquee::before {
+  content: '';
+  position: absolute; inset: 8px;
+  border-radius: 22px;
+  padding: 7px;
+  background: radial-gradient(circle, var(--bulb) 0 3.5px, rgba(255,244,184,.25) 4.5px, transparent 5.5px) 0 0 / 20px 20px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: chase 1.2s steps(2) infinite;
+}
+@keyframes chase { to { background-position: 10px 10px; } }
+.logo {
+  margin: 0;
+  font-family: var(--shade);
+  font-weight: 400;
+  font-size: clamp(46px, 11vw, 120px);
+  line-height: .95;
+  color: var(--gold);
+  text-shadow: 0 4px 0 #7a0f3d;
+  letter-spacing: .02em;
+}
+.tagline { margin: 10px 0 0; font-family: var(--display); font-size: clamp(14px, 2.4vw, 22px); color: var(--cream); letter-spacing: .06em; }
+
+h2 { font-family: var(--display); font-weight: 400; margin: 0; font-size: clamp(26px, 4.5vw, 44px); color: var(--gold); text-shadow: 0 3px 0 #000a; line-height: 1.1; }
+h3 { font-family: var(--display); font-weight: 400; margin: 0 0 8px; font-size: 1em; color: var(--teal); letter-spacing: .04em; }
+p { margin: 0; line-height: 1.4; }
+.muted { color: var(--muted); }
+.center { text-align: center; }
+
+/* ---------- chunky game show buttons ---------- */
+.btn {
+  --c: var(--gold); --d: var(--gold-deep); --t: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 64px;
+  padding: 14px 28px;
+  border: 0; border-radius: 18px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 80%, white), var(--c));
+  color: var(--t);
+  font-family: var(--display); font-size: clamp(20px, 2.4vw, 28px); letter-spacing: .03em;
+  box-shadow: 0 8px 0 var(--d), 0 12px 24px #0006;
+  cursor: pointer;
+  transition: transform .08s, box-shadow .08s, filter .15s;
+  touch-action: manipulation;
+  text-align: center;
+}
+.btn:hover { filter: brightness(1.07); }
+.btn:active { transform: translateY(6px); box-shadow: 0 2px 0 var(--d), 0 4px 10px #0006; }
+.btn:disabled { filter: grayscale(.8) brightness(.7); cursor: not-allowed; transform: none; }
+.btn.pink { --c: var(--pink); --d: var(--pink-deep); --t: #fff; }
+.btn.teal { --c: var(--teal); --d: var(--teal-deep); --t: var(--ink); }
+.btn.ghost { --c: #3d1f66; --d: #1f0c38; --t: var(--cream); }
+.btn.small { min-height: 48px; padding: 8px 18px; font-size: 18px; border-radius: 14px; box-shadow: 0 5px 0 var(--d); }
+.btn.small:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--d); }
+.btn.block { width: 100%; }
+.link { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; padding: 10px; font-size: .85em; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.row > .btn { flex: 1 1 200px; }
+
+/* ---------- panels, inputs ---------- */
+.panel {
+  background: rgba(20, 6, 38, .72);
+  border: 3px solid #4d2a7a;
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: inset 0 0 0 2px #0004;
+}
+.field {
+  width: 100%;
+  min-height: 60px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 3px solid #5b3590;
+  background: #12051f;
+  color: var(--cream);
+  font-size: clamp(20px, 2.2vw, 26px);
+  outline: none;
+}
+.field:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(255,197,61,.25); }
+.field::placeholder { color: #8f78b3; }
+.code-field { font-family: var(--display); text-transform: uppercase; letter-spacing: .35em; text-align: center; font-size: 38px; }
+label.lbl { display: block; font-size: .8em; color: var(--muted); margin: 0 0 6px; }
+
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg button, .chip {
+  min-height: 50px; padding: 8px 16px;
+  border-radius: 999px; border: 3px solid #5b3590;
+  background: #12051f; color: var(--cream);
+  font-family: var(--display); font-size: 17px; cursor: pointer;
+}
+.seg button.on, .chip.on { background: var(--teal); border-color: var(--teal); color: var(--ink); }
+
+.player-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.player-row .field { flex: 1; min-width: 0; }
+.x { width: 60px; flex: none; border-radius: 14px; border: 3px solid #5b3590; background: #12051f; color: var(--muted); font-size: 26px; cursor: pointer; }
+
+.error { color: #ffd0d4; background: rgba(255, 70, 85, .22); border: 2px solid var(--red); border-radius: 14px; padding: 10px 14px; }
+
+/* ---------- the question card ---------- */
+.round-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pill { font-family: var(--display); font-size: clamp(15px, 1.6vw, 22px); padding: 8px 16px; border-radius: 999px; background: #0008; border: 2px solid var(--gold); color: var(--gold); letter-spacing: .05em; }
+.pill.cat { border-color: var(--teal); color: var(--teal); }
+.pill.double { background: var(--red); border-color: var(--bulb); color: #fff; animation: throb 1s ease-in-out infinite; }
+@keyframes throb { 50% { transform: scale(1.08); } }
+.qcard {
+  position: relative;
+  background: var(--card); color: var(--ink);
+  border-radius: 26px;
+  padding: clamp(22px, 3.5vw, 44px);
+  font-family: var(--body); font-weight: 800;
+  font-size: clamp(24px, 3.6vw, 54px);
+  line-height: 1.22;
+  box-shadow: 0 10px 0 #b9a27a, 0 18px 40px #000a;
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.qcard.compact { font-size: clamp(21px, 2.6vw, 34px); padding: 20px 22px; }
+.qcard .blank { display: inline-block; min-width: 3.2em; border-bottom: .12em solid var(--pink); color: var(--pink); }
+.qcard .by { display: block; margin-top: 10px; font-size: .45em; color: #7d6590; font-weight: 700; }
+
+/* ---------- timer ---------- */
+.timer { position: relative; height: 16px; border-radius: 99px; background: #0009; border: 2px solid #4d2a7a; overflow: hidden; }
+.timer i { position: absolute; inset: 0; transform-origin: left; background: linear-gradient(90deg, var(--red), var(--orange), var(--gold)); }
+.timer-num { font-family: var(--display); color: var(--gold); font-size: 1.1em; min-width: 3ch; text-align: right; }
+
+/* ---------- player tiles on the board ---------- */
+.tiles { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.tile {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 14px;
+  background: #2a1247; border: 3px solid #4d2a7a;
+  font-weight: 700; font-size: clamp(17px, 1.6vw, 24px);
+  transition: background .2s, border-color .2s, transform .2s;
+}
+.tile.done { background: var(--teal); border-color: var(--bulb); color: var(--ink); transform: rotate(-2deg); }
+.tile.out { opacity: .5; font-style: italic; }
+.tile .mark { font-family: var(--display); }
+.tile button { background: none; border: 0; color: inherit; font-size: 22px; cursor: pointer; padding: 0 0 0 6px; opacity: .6; }
+
+/* ---------- answer choices ---------- */
+.choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.choice {
+  display: flex; align-items: center; gap: 14px;
+  min-height: 72px; padding: 12px 18px;
+  border-radius: 18px; border: 3px solid #5b3590;
+  background: #2a1247; color: var(--cream);
+  font-weight: 800; font-size: clamp(20px, 2.2vw, 32px); text-align: left;
+  cursor: pointer; overflow-wrap: anywhere;
+}
+.choice .letter { flex: none; width: 1.8em; height: 1.8em; display: grid; place-items: center; border-radius: 50%; background: var(--gold); color: var(--ink); font-family: var(--display); font-size: .8em; }
+.choice.on { background: var(--pink); border-color: var(--bulb); color: #fff; transform: scale(1.02); }
+.choices.board .choice { cursor: default; }
+
+/* ---------- pass the device ---------- */
+.pass-name { font-family: var(--display); font-size: clamp(44px, 12vw, 110px); line-height: 1; color: var(--gold); text-shadow: 0 5px 0 #7a0f3d; overflow-wrap: anywhere; }
+.curtain {
+  position: relative;
+  border-radius: 26px; padding: 40px 20px;
+  background: repeating-linear-gradient(90deg, #8a1840 0 26px, var(--curtain) 26px 52px);
+  box-shadow: inset 0 -30px 40px #0007, 0 10px 0 #3a0719;
+  text-align: center;
+}
+
+/* ---------- reveal ---------- */
+.spot { position: relative; min-height: 240px; display: grid; place-items: center; }
+.spot::before { content: ''; position: absolute; inset: -40px 0; background: radial-gradient(ellipse at 50% 40%, rgba(255,244,184,.25), transparent 65%); pointer-events: none; }
+.answer-card {
+  position: relative;
+  width: min(100%, 900px);
+  padding: clamp(24px, 4vw, 48px);
+  border-radius: 28px;
+  background: var(--card); color: var(--ink);
+  text-align: center;
+  font-weight: 800; font-size: clamp(30px, 5.5vw, 80px); line-height: 1.1;
+  box-shadow: 0 12px 0 #b9a27a, 0 24px 60px #000c;
+  animation: flip-in .6s cubic-bezier(.2, 1.4, .4, 1);
+  overflow-wrap: anywhere;
+}
+.answer-card.truth { background: linear-gradient(180deg, #fff7c2, var(--gold)); box-shadow: 0 12px 0 var(--gold-deep), 0 0 90px rgba(255,197,61,.8); }
+@keyframes flip-in { from { transform: rotateX(90deg) scale(.7); opacity: 0; } }
+.stamp {
+  position: absolute; right: 12px; top: -26px;
+  padding: 6px 18px; border-radius: 12px;
+  border: 5px solid currentColor;
+  font-family: var(--display); font-size: clamp(24px, 3.5vw, 48px);
+  transform: rotate(8deg); background: #fff;
+  opacity: 0; animation: stamp .35s ease-in forwards;
+}
+.stamp.lie { color: var(--red); }
+.stamp.true { color: #0a8a4a; }
+@keyframes stamp { from { opacity: 0; transform: rotate(8deg) scale(2.4); } to { opacity: 1; transform: rotate(8deg) scale(1); } }
+.pickers { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.pickers .tile { animation: pop .3s backwards; }
+@keyframes pop { from { transform: scale(0); } }
+.verdict { text-align: center; font-size: clamp(22px, 2.6vw, 36px); font-weight: 800; }
+.verdict b { color: var(--gold); }
+.later { opacity: 0; animation: fade-up .45s forwards; }
+@keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.fact { text-align: center; color: var(--cream); font-size: clamp(18px, 1.9vw, 26px); max-width: 900px; margin: 0 auto; }
+.plus { display: inline-block; font-family: var(--display); color: var(--ink); background: var(--gold); padding: 2px 12px; border-radius: 10px; margin-left: 6px; }
+
+/* ---------- scores ---------- */
+.scoreboard { display: flex; flex-direction: column; gap: 10px; }
+.score-row {
+  display: grid; grid-template-columns: 2.2em 1fr auto; align-items: center; gap: 12px;
+  padding: 10px 16px; border-radius: 16px;
+  background: #2a1247; border: 3px solid #4d2a7a;
+  animation: fade-up .4s backwards;
+  font-size: clamp(20px, 2vw, 30px);
+}
+.score-row.first { background: linear-gradient(90deg, #5a3a00, #2a1247); border-color: var(--gold); }
+.score-row .rank { font-family: var(--display); color: var(--gold); }
+.score-row .who { font-weight: 800; overflow-wrap: anywhere; }
+.score-row .bar { height: 10px; border-radius: 99px; background: linear-gradient(90deg, var(--pink), var(--gold)); margin-top: 6px; transform-origin: left; animation: grow .9s ease-out backwards; }
+@keyframes grow { from { transform: scaleX(0); } }
+.score-row .pts { font-family: var(--display); color: var(--cream); text-align: right; }
+.score-row .gain { display: block; font-size: .6em; color: var(--teal); }
+
+/* ---------- podium ---------- */
+.podium { display: flex; align-items: flex-end; justify-content: center; gap: 10px; }
+.step { flex: 1 1 0; max-width: 240px; text-align: center; }
+.step .who { font-weight: 800; font-size: clamp(18px, 2.2vw, 30px); overflow-wrap: anywhere; }
+.step .block { margin-top: 8px; border-radius: 16px 16px 4px 4px; font-family: var(--display); font-size: clamp(30px, 5vw, 64px); display: grid; place-items: center; color: var(--ink); box-shadow: inset 0 -12px 0 #0003; }
+.step.p1 .block { height: 190px; background: var(--gold); }
+.step.p2 .block { height: 130px; background: #d7d9e6; }
+.step.p3 .block { height: 95px; background: #e59a5b; }
+.award { display: flex; gap: 14px; align-items: center; }
+.award .icon { font-size: 44px; }
+
+/* ---------- lobby ---------- */
+.lobby-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.room-code { font-family: var(--display); font-size: clamp(64px, 11vw, 150px); letter-spacing: .12em; color: var(--gold); line-height: 1; text-shadow: 0 6px 0 #7a0f3d; }
+.qr { background: #fff; border-radius: 16px; padding: 8px; width: min(240px, 60vw); margin: 0 auto; }
+.qr svg { display: block; width: 100%; height: auto; }
+.join-url { font-weight: 700; color: var(--teal); overflow-wrap: anywhere; }
+
+/* ---------- phone waiting screen ---------- */
+.big-emoji { font-size: 80px; line-height: 1; text-align: center; }
+.my-score { font-family: var(--display); font-size: 42px; color: var(--gold); text-align: center; }
+
+/* ---------- custom questions ---------- */
+.custom-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 2px dashed #4d2a7a; }
+.custom-item:last-child { border-bottom: 0; }
+.custom-item .txt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.custom-item .ans { color: var(--gold); font-weight: 700; }
+
+.toast {
+  position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  background: var(--cream); color: var(--ink); font-weight: 800;
+  padding: 14px 22px; border-radius: 16px; box-shadow: 0 8px 30px #000a; z-index: 50;
+  animation: fade-up .25s;
+}
+.status-dot { position: fixed; top: max(10px, env(safe-area-inset-top)); right: 12px; z-index: 40; font-size: 14px; padding: 6px 12px; border-radius: 99px; background: var(--red); color: #fff; font-weight: 800; }
+
+@media (max-width: 720px) {
+  .lobby-grid { grid-template-columns: 1fr; }
+  .step.p1 .block { height: 140px; } .step.p2 .block { height: 100px; } .step.p3 .block { height: 70px; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .marquee { padding: 14px; }
+  .logo { font-size: 44px; }
+  .qcard { font-size: 22px; padding: 16px; }
+  .btn { min-height: 54px; }
+  .spot { min-height: 150px; }
+  .answer-card { font-size: 30px; padding: 18px; }
+}
+/* a TV or big monitor across the room: everything bigger */
+@media (min-width: 1400px) and (min-height: 760px) {
+  body { font-size: 28px; }
+  .wide { max-width: 1680px; }
+  .pill { font-size: 28px; padding: 10px 22px; }
+  .qcard { font-size: clamp(54px, 3.6vw, 76px); }
+  .qcard.compact { font-size: clamp(36px, 2.4vw, 50px); }
+  h2 { font-size: 58px; }
+  .choice { font-size: 42px; min-height: 120px; padding: 18px 26px; }
+  .choices { grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px; }
+  .tile { font-size: 30px; padding: 12px 22px; }
+  .timer { height: 22px; }
+  .answer-card { font-size: 110px; }
+  .stamp { font-size: 58px; }
+  .verdict { font-size: 48px; }
+  .fact { font-size: 34px; max-width: 1300px; }
+  .score-row { font-size: 38px; }
+  .room-code { font-size: 210px; }
+  .qr { width: 340px; }
+  .join-url { font-size: 40px; }
+  .btn { font-size: 34px; min-height: 84px; }
+  #scores .wrap, #final .wrap { max-width: 1100px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before { animation-duration: .01s !important; animation-iteration-count: 1 !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<section class="screen" id="home">
+  <div class="wrap">
+    <div class="marquee">
+      <h1 class="logo">BLUFF<br>SHOW</h1>
+      <p class="tagline">★ LIE WELL · SPOT THE TRUTH ★</p>
+    </div>
+    <p class="center">Every question hides a strange-but-true answer. Write a fake one so good your friends pick it, and find the real one yourself.</p>
+    <button class="btn block" id="go-local">📱 Play on this device</button>
+    <div class="row">
+      <button class="btn pink" id="go-host">📺 Host a room</button>
+      <button class="btn teal" id="go-join">🎟️ Join a room</button>
+    </div>
+    <p class="muted center" id="room-off" hidden>Room mode isn't switched on yet. It needs the Supabase address in <code>config.js</code>.</p>
+    <details class="panel">
+      <summary><b>How to play</b></summary>
+      <ol>
+        <li>A strange-but-true question appears with a blank.</li>
+        <li>Everyone secretly writes a <b>fake answer</b> that sounds real.</li>
+        <li>All the fakes are mixed in with the real answer.</li>
+        <li>Everyone picks the one they think is <b>true</b>.</li>
+        <li><b>+1000</b> for finding the truth, <b>+500</b> for every player you fool. The last round is worth double.</li>
+      </ol>
+      <p class="muted"><b>This device:</b> pass one phone or tablet around. <b>Room:</b> a TV or laptop shows the game and everyone plays on their own phone.</p>
+    </details>
+  </div>
+</section>
+
+<!-- SETUP (local game or hosting a room) -->
+<section class="screen" id="setup" hidden>
+  <div class="wrap">
+    <div class="row" style="justify-content:space-between">
+      <h2 id="setup-title">New game</h2>
+      <button class="btn ghost small" data-home>← Back</button>
+    </div>
+    <div class="panel" id="players-panel">
+      <h3>PLAYERS <span class="muted" id="player-count"></span></h3>
+      <div id="player-list"></div>
+      <button class="btn ghost small" id="add-player">+ Add player</button>
+    </div>
+    <div class="panel">
+      <h3>ROUNDS</h3>
+      <div class="seg" data-key="rounds">
+        <button data-v="5">5</button><button data-v="7">7</button><button data-v="10">10</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>CATEGORIES <span class="muted" id="cat-count"></span></h3>
+      <div class="seg" id="cats"></div>
+    </div>
+    <div class="panel" id="timer-panel">
+      <h3>TIME TO WRITE</h3>
+      <div class="seg" data-key="writeSec">
+        <button data-v="60">60s</button><button data-v="90">90s</button><button data-v="120">120s</button><button data-v="0">No limit</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>YOUR OWN QUESTIONS</h3>
+      <p class="muted" id="custom-summary"></p>
+      <div class="row" style="margin-top:12px">
+        <button class="btn ghost small" id="edit-custom">✏️ Write questions</button>
+        <div class="seg" data-key="useCustom"><button data-v="1">Use them</button><button data-v="0">Skip</button></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>SOUND</h3>
+      <div class="seg" data-key="sound"><button data-v="1">On</button><button data-v="0">Off</button></div>
+    </div>
+    <p class="error" id="setup-error" hidden></p>
+    <button class="btn block" id="start">Start the show!</button>
+  </div>
+</section>
+
+<!-- CUSTOM QUESTIONS -->
+<section class="screen" id="custom" hidden>
+  <div class="wrap">
+    <div class="row" style="justify-content:space-between">
+      <h2>Your questions</h2>
+      <button class="btn ghost small" id="custom-back">← Done</button>
+    </div>
+    <p class="muted">Write a true fact with the answer blanked out, like <i>"Aina once got lost in ____ for a whole day."</i> Whoever wrote it knows the answer, so they sit that round out.</p>
+    <form class="panel" id="custom-form">
+      <label class="lbl" for="c-q">Question (use ____ for the blank)</label>
+      <textarea class="field" id="c-q" rows="2" maxlength="160" placeholder="Hafiz's first job was ____."></textarea>
+      <label class="lbl" for="c-a" style="margin-top:12px">The true answer</label>
+      <input class="field" id="c-a" maxlength="60" placeholder="selling durians">
+      <label class="lbl" for="c-by" style="margin-top:12px">Written by (their name, so they sit it out)</label>
+      <input class="field" id="c-by" maxlength="20" placeholder="Nobody playing">
+      <p class="error" id="custom-error" hidden style="margin-top:12px"></p>
+      <button class="btn teal block" style="margin-top:14px">+ Add question</button>
+    </form>
+    <div class="panel" id="custom-list"></div>
+  </div>
+</section>
+
+<!-- LOBBY (host screen) -->
+<section class="screen" id="lobby" hidden>
+  <div class="wrap wide">
+    <div class="lobby-grid">
+      <div class="panel center">
+        <p class="muted">Go to</p>
+        <p class="join-url" id="join-url"></p>
+        <p class="muted" style="margin-top:10px">and enter the code</p>
+        <div class="room-code" id="room-code">····</div>
+        <div class="qr" id="qr" style="margin-top:14px"></div>
+      </div>
+      <div class="panel">
+        <h3>CONTESTANTS <span class="muted" id="lobby-count"></span></h3>
+        <div class="tiles" id="lobby-players" style="justify-content:flex-start"></div>
+        <p class="muted" id="lobby-hint" style="margin-top:14px">Waiting for at least 3 players… Tap a name to remove it.</p>
+      </div>
+    </div>
+    <div class="row">
+      <button class="btn ghost" data-home>Close room</button>
+      <button class="btn" id="lobby-start" disabled>Start the show!</button>
+    </div>
+  </div>
+</section>
+
+<!-- BOARD: the shared screen while people write and pick -->
+<section class="screen" id="board" hidden>
+  <div class="wrap wide">
+    <div class="round-bar">
+      <span class="pill" id="b-round"></span>
+      <span class="pill double" id="b-double" hidden>FINAL · DOUBLE POINTS</span>
+      <span class="pill cat" id="b-cat"></span>
+    </div>
+    <div class="qcard" id="b-question"></div>
+    <div class="row" id="b-timer-row" hidden>
+      <div class="timer" style="flex:1"><i id="b-timer"></i></div>
+      <span class="timer-num" id="b-timer-num"></span>
+    </div>
+    <h2 class="center" id="b-heading"></h2>
+    <div class="choices board" id="b-choices"></div>
+    <div class="tiles" id="b-tiles"></div>
+    <p class="center muted" id="b-note"></p>
+    <div class="row">
+      <button class="btn block" id="b-go"></button>
+    </div>
+    <p class="center" id="b-room-hint" hidden><span class="muted">Late? Join with code</span> <b class="pill" id="b-code"></b></p>
+    <button class="link" id="b-skip" hidden>Skip waiting</button>
+  </div>
+</section>
+
+<!-- PASS THE DEVICE -->
+<section class="screen" id="pass" hidden>
+  <div class="wrap">
+    <div class="curtain">
+      <p style="font-family:var(--display);letter-spacing:.08em">HAND THE DEVICE TO</p>
+      <div class="pass-name" id="pass-name"></div>
+      <p id="pass-why" style="margin-top:12px"></p>
+    </div>
+    <p class="center muted">Everyone else, look away!</p>
+    <button class="btn block" id="pass-go"></button>
+    <button class="link" id="pass-skip">Skip this player</button>
+  </div>
+</section>
+
+<!-- WRITE A LIE (private: pass mode and phones) -->
+<section class="screen" id="write" hidden>
+  <div class="wrap">
+    <div class="round-bar"><span class="pill" id="w-who"></span><span class="timer-num" id="w-timer-num"></span></div>
+    <div class="qcard compact" id="w-question"></div>
+    <form id="write-form" class="panel">
+      <label class="lbl" for="lie">Write a FAKE answer that sounds true</label>
+      <input class="field" id="lie" maxlength="60" autocomplete="off" autocapitalize="off" enterkeyhint="done" placeholder="Your best lie…">
+      <p class="error" id="write-error" hidden style="margin-top:12px"></p>
+      <div class="row" style="margin-top:14px">
+        <button type="button" class="btn ghost small" id="idea">💡 Need an idea?</button>
+        <button class="btn pink">Lock in my lie</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- PICK THE TRUTH (private: pass mode and phones) -->
+<section class="screen" id="pick" hidden>
+  <div class="wrap">
+    <div class="round-bar"><span class="pill" id="p-who"></span><span class="timer-num" id="p-timer-num"></span></div>
+    <div class="qcard compact" id="p-question"></div>
+    <h2 class="center">Which one is TRUE?</h2>
+    <div class="choices" id="p-choices"></div>
+    <p class="error" id="pick-error" hidden></p>
+    <button class="btn teal block" id="pick-lock" disabled>Lock it in</button>
+  </div>
+</section>
+
+<!-- REVEAL -->
+<section class="screen" id="reveal" hidden>
+  <div class="wrap wide">
+    <div class="round-bar">
+      <span class="pill" id="r-round"></span>
+      <span class="pill cat" id="r-count"></span>
+    </div>
+    <div class="qcard compact" id="r-question"></div>
+    <div class="spot" id="r-spot"></div>
+    <div id="r-detail" style="display:flex;flex-direction:column;gap:14px"></div>
+    <button class="btn block" id="r-next">Next</button>
+  </div>
+</section>
+
+<!-- SCORES -->
+<section class="screen" id="scores" hidden>
+  <div class="wrap">
+    <h2 class="center" id="s-title">SCOREBOARD</h2>
+    <div class="scoreboard" id="s-list"></div>
+    <button class="btn block" id="s-next">Next round</button>
+  </div>
+</section>
+
+<!-- FINAL -->
+<section class="screen" id="final" hidden>
+  <div class="wrap">
+    <div class="marquee"><h1 class="logo" style="font-size:clamp(40px,8vw,90px)">WINNER!</h1></div>
+    <div class="podium" id="f-podium"></div>
+    <div class="panel" id="f-awards" style="display:flex;flex-direction:column;gap:14px"></div>
+    <div class="scoreboard" id="f-rest"></div>
+    <div class="row" id="f-buttons">
+      <button class="btn ghost" data-home>Home</button>
+      <button class="btn" id="again">Play again</button>
+    </div>
+  </div>
+</section>
+
+<!-- JOIN (phone) -->
+<section class="screen" id="join" hidden>
+  <div class="wrap">
+    <div class="row" style="justify-content:space-between">
+      <h2>Join a room</h2>
+      <button class="btn ghost small" data-home>← Back</button>
+    </div>
+    <form class="panel" id="join-form">
+      <label class="lbl" for="j-code">Room code (on the TV)</label>
+      <input class="field code-field" id="j-code" maxlength="4" autocomplete="off" autocapitalize="characters" placeholder="ABCD">
+      <label class="lbl" for="j-name" style="margin-top:14px">Your name</label>
+      <input class="field" id="j-name" maxlength="14" autocomplete="nickname" placeholder="Name">
+      <p class="error" id="join-error" hidden style="margin-top:12px"></p>
+      <button class="btn teal block" style="margin-top:16px" id="join-btn">Join the show</button>
+    </form>
+  </div>
+</section>
+
+<!-- WAIT (phone) -->
+<section class="screen" id="wait" hidden>
+  <div class="wrap">
+    <div class="round-bar"><span class="pill" id="wait-me"></span><span class="timer-num" id="wait-timer-num"></span></div>
+    <div class="big-emoji" id="wait-emoji">📺</div>
+    <h2 class="center" id="wait-title"></h2>
+    <p class="center" id="wait-text"></p>
+    <div class="my-score" id="wait-score" hidden></div>
+    <button class="btn block" id="vip-start" hidden>Everyone's in, start!</button>
+  </div>
+</section>
+
+<div class="status-dot" id="net" hidden>Reconnecting…</div>
+
+<script src="questions.js"></script>
+<script src="config.js"></script>
+<script src="engine.js"></script>
+<script src="room.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
