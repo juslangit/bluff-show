@@ -255,13 +255,13 @@ FONTS = "https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:ital,wght@
 # The game's own palette: cream question cards and deep aubergine ink by day, the purple stage at
 # night, gold marquee flag, pink for links (deepened in light mode to stay readable), teal for done.
 # Bungee comes in one weight only, so faux bold is switched off rather than smeared.
-LIGHT = """--ground: #FFF6E5; --surface: #FFFDF7; --ink: #1B0B2B; --muted: #5E4A73; --line: #E8D9C0;
-  --accent: #A8124F; --accent-soft: #FBE3EC; --flag: #FFC53D; --flag-ink: #1B0B2B; --done: #0A6F67;
+LIGHT = """--ground: #FAF7F2; --surface: #FFFFFF; --ink: #2B2622; --muted: #6B6259; --line: #E7E1D8;
+  --accent: #2F6BB0; --accent-soft: #D6E6FA; --flag: #FFEEC9; --flag-ink: #A97B12; --done: #2F7A5C;
   --display: "Bungee", "Arial Black", Impact, system-ui, sans-serif;
   --body: "Rubik", system-ui, -apple-system, "Segoe UI", sans-serif; --mono: "Space Mono", ui-monospace, Menlo, monospace;
   --heading-case: uppercase; font-synthesis-weight: none;"""
-DARK = """--ground: #1A0B2E; --surface: #251040; --ink: #FFF6E5; --muted: #C7B3E6; --line: #3D2366;
-  --accent: #FF7AB0; --accent-soft: #3A1A5C; --done: #3FDCCD;"""
+DARK = """--ground: #FAF7F2; --surface: #FFFFFF; --ink: #2B2622; --muted: #6B6259; --line: #E7E1D8;
+  --accent: #2F6BB0; --accent-soft: #D6E6FA; --done: #2F7A5C;"""
 
 
 # ============================== engine: the same in every game ==============================
@@ -711,8 +711,8 @@ TEMPLATE = """<!doctype html>
 <link rel="stylesheet" href="{{FONTS}}">
 <style>
 :root { {{LIGHT}} color-scheme: light; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { {{DARK}} color-scheme: dark; } }
-:root[data-theme="dark"] { {{DARK}} color-scheme: dark; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="light"]) { {{DARK}} color-scheme: light; } }
+:root[data-theme="dark"] { {{DARK}} color-scheme: light; }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
