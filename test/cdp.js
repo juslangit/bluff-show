@@ -3,7 +3,11 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const PORT = 9342;
+// CDP_PORT and CDP_WEBGL let a second browser run beside the first: the stock
+// one has no GPU, so Phaser falls back to its Canvas renderer, and the effects
+// suite runs again in one with software WebGL so both renderers are tested.
+const PORT = +process.env.CDP_PORT || 9342;
+const WEBGL = !!process.env.CDP_WEBGL;
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -21,9 +25,10 @@ async function launch() {
   if (await alreadyRunning()) return null;
 
   const proc = spawn(CHROME, [
-    '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
+    '--headless=new', ...(WEBGL ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] : ['--disable-gpu']),
+    '--no-first-run', '--no-default-browser-check',
     `--remote-debugging-port=${PORT}`, '--window-size=1400,900',
-    '--user-data-dir=' + __dirname + '/chrome-profile',
+    '--user-data-dir=' + __dirname + '/chrome-profile' + (WEBGL ? '-webgl' : ''),
     '--force-device-scale-factor=2',
     'about:blank',
   ], { stdio: 'ignore', detached: false });
