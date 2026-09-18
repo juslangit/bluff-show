@@ -37,6 +37,20 @@ custom questions come up first. To add questions permanently, edit
 | `room.js` | Room mode messenger (Supabase, or BroadcastChannel for tests) |
 | `questions.js` | The question bank |
 | `config.js` | Supabase address and publishable key for room mode |
+| `fx.js` | The effects layer: confetti, stars, flashes and real sound, drawn by Phaser over the page |
+| `sounds.js` | The sound bank, from Kenney's free CC0 packs, rebuilt by `tools/build_sounds.py` |
+| `vendor/phaser.min.js` | Phaser 4, kept here so nothing is fetched from the internet |
+
+## Effects
+
+The show itself is plain HTML, because it is mostly typing and picking from
+lists, which web pages do well and Phaser does not. On top of it,
+[Phaser](https://phaser.io) 4 draws on a see-through canvas over the page: a
+gold flash and a shower of stars when the TRUTH is stamped, a shake and a red
+spray for a LIE, a ring round every score that goes up, and confetti and a
+fanfare for the winner, with a real drum roll and saxophone stings in place of
+the old beeps. It never takes a tap, it is asleep and hidden while anyone
+types, and if Phaser fails to load the show runs on with its original tones.
 
 ## Tests
 
@@ -46,4 +60,8 @@ custom questions come up first. To add questions permanently, edit
 
 Runs the rules tests, then plays full games in headless Chrome: a pass-the-device
 game at phone, phone-landscape, tablet and desktop sizes, and a room game with a TV
-tab and three phone tabs talking over `?transport=local`. Needs Node and Google Chrome.
+tab and three phone tabs talking over `?transport=local`. Then it checks the effects
+layer twice, with Phaser's Canvas renderer and with WebGL: that it never blocks a tap,
+stays asleep while someone types, fires each reveal's effect only while that answer
+is on screen, never sprays over the points, honours reduce-motion, and that the show
+still runs with Phaser missing. Needs Node and Google Chrome.

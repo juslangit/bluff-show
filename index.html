@@ -635,6 +635,13 @@ label.lbl { display: block; font-size: .8em; color: var(--muted); margin: 0 0 6p
 
 <div class="status-dot" id="net" hidden>Reconnecting…</div>
 
+<!-- The effects layer: Phaser draws confetti, bursts and flashes on a
+     see-through canvas over the page, and plays the real sounds. The show
+     itself stays plain HTML -- see fx.js for why. -->
+<script>window.FX_PALETTE = ['#ffc53d', '#ff3d8b', '#1fd6c6', '#ff8a1f', '#fff6e5', '#9b5de5'];</script>
+<script src="vendor/phaser.min.js"></script>
+<script src="sounds.js"></script>
+<script src="fx.js"></script>
 <script src="questions.js"></script>
 <script src="config.js"></script>
 <script src="engine.js"></script>

@@ -63,7 +63,13 @@ function questionHtml(q) {
   return html;
 }
 
-// ---------- sound (made in code, no files) ----------
+// ---------- effects and sound ----------
+// fx.js does the confetti, bursts and real sounds. If it never loaded, this
+// stand-in answers every call with "no", and the tones below take over.
+const fx = window.FX || { sound: () => false, burst() {}, confetti() {}, ring() {}, flash() {}, shake() {}, pop() {} };
+
+// The tones are made in code. They are the fallback: they cover the first tap,
+// before the browser lets a sound file play, and a browser where fx.js failed.
 let audio = null;
 function tone(freq, dur, { type = 'triangle', vol = 0.12, delay = 0, slide = 0 } = {}) {
   if (!settings.sound) return;
@@ -81,7 +87,7 @@ function tone(freq, dur, { type = 'triangle', vol = 0.12, delay = 0, slide = 0 }
     o.start(t); o.stop(t + dur + 0.05);
   } catch { }
 }
-const sfx = {
+const tones = {
   click: () => tone(660, 0.06, { type: 'square', vol: 0.05 }),
   pop: () => { tone(520, 0.08, { vol: 0.1 }); tone(880, 0.12, { vol: 0.1, delay: 0.07 }); },
   join: () => [523, 659, 784].forEach((f, i) => tone(f, 0.15, { delay: i * 0.08 })),
@@ -89,6 +95,17 @@ const sfx = {
   wah: () => [392, 370, 349, 294].forEach((f, i) => tone(f, i === 3 ? 0.7 : 0.28, { type: 'sawtooth', vol: 0.07, delay: 0.25 + i * 0.3, slide: i === 3 ? 0.9 : 1 })),
   ding: () => [784, 988, 1319].forEach((f, i) => tone(f, 0.35, { type: 'sine', vol: 0.14, delay: 0.25 + i * 0.12 })),
   fanfare: () => [523, 523, 523, 698, 880, 1047].forEach((f, i) => tone(f, i === 5 ? 0.8 : 0.16, { type: 'square', vol: 0.06, delay: i * 0.14 })),
+};
+tones.win = tones.fanfare;
+// Each sound: the real one if fx.js can play it, otherwise its tone.
+const sfx = Object.fromEntries(Object.entries(tones).map(([name, fallback]) =>
+  [name, () => { if (settings.sound && !fx.sound(name)) fallback(); }]));
+// The drum roll is fourteen beats of one thud, building up.
+sfx.drum = () => {
+  if (!settings.sound) return;
+  for (let i = 0; i < 14; i++) {
+    if (!fx.sound('hit', { delay: i * 0.045, volume: 0.35 + i * 0.05 })) return tones.drum();
+  }
 };
 
 // ---------- keep the screen awake during a game ----------
@@ -513,6 +530,28 @@ function showReveal() {
   sfx.drum();
   setTimeout(() => (step.truth ? sfx.ding : sfx.wah)(), 1300);
 
+  // The stamp lands at 1.6 s. TRUTH gets a golden flash and a shower of stars;
+  // a LIE gets the card shaken and a red spray. Skipped if the host has
+  // already moved on to the next answer.
+  const shown = revealIndex;
+  setTimeout(() => {
+    if (revealIndex !== shown || current() !== 'reveal') return;
+    const stamp = $('#r-spot .stamp');
+    if (step.truth) {
+      fx.flash('#ffc53d', 0.22);
+      fx.burst(stamp, { kind: 'star', colors: ['#ffc53d', '#fff4b8', '#1fd6c6'], count: 36 });
+    } else {
+      fx.shake($('#r-spot .answer-card'), 12);
+      fx.burst(stamp, { colors: ['#ff4655', '#ff3d8b'], count: 26 });
+    }
+  }, 1600);
+  // ...and the points, when they appear at 2 s: a pop and a ring rather than
+  // sparks, because sparks on the badge would hide the number being announced.
+  setTimeout(() => {
+    if (revealIndex !== shown || current() !== 'reveal') return;
+    $$('#r-detail .plus').forEach(el => { fx.pop(el); fx.ring(el, '#ffc53d'); });
+  }, 2050);
+
   if (mode === 'host') {
     broadcast({ step: revealIndex });
     clearTimeout(stepHandle);
@@ -535,6 +574,12 @@ function showScores() {
   $('#s-next').textContent = lastRound ? 'And the winner is… →' : 'Next round →';
   show('scores');
   sfx.pop();
+  // A pop and a ring on every score that went up, as its row slides in --
+  // around the number, never over it.
+  $$('#s-list .score-row').forEach((row, i) => {
+    const gain = row.querySelector('.gain');
+    if (gain) setTimeout(() => { if (current() === 'scores') { fx.pop(gain); fx.ring(gain, '#1fd6c6'); } }, 450 + i * 80);
+  });
   broadcast();
   if (mode === 'host') stepHandle = setTimeout(scoresNext, REVEAL_MS.scores);
 }
@@ -567,7 +612,10 @@ function showFinal() {
   $('#f-rest').innerHTML = scoreRows(list.slice(3), {}, 3);
   $('#again').textContent = mode === 'host' ? 'Play again (same room)' : 'Play again';
   show('final');
-  sfx.fanfare();
+  sfx.win();
+  fx.confetti({ count: 90 });
+  // Stars over the winner's step once the podium has risen.
+  setTimeout(() => current() === 'final' && fx.burst('#f-podium .p1', { kind: 'star', colors: ['#ffc53d', '#fff4b8'], count: 40 }), 700);
   broadcast();
 }
 $('#again').onclick = () => {
@@ -662,7 +710,12 @@ function onHostMessage(msg) {
         Engine.addPlayer(state, { id: msg.pid, name });
         sfx.join();
         toast(`${name} joined!`);
-        if (state.phase === 'lobby') renderLobby(); else if (current() === 'board') renderBoard();
+        if (state.phase === 'lobby') {
+          renderLobby();
+          const tile = $('#lobby-players .tile:last-child');
+          fx.pop(tile);
+          fx.burst(tile, { kind: 'star', count: 16 });
+        } else if (current() === 'board') renderBoard();
       }
       return broadcast();
     }
